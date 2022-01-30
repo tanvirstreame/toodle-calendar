@@ -1,0 +1,43 @@
+.month-view-component {
+    background-color: white;
+    max-width: 280px;
+    font: 100% system-ui;
+    padding: 10px;
+}
+
+.month-name {
+    color: black;
+    text-align: center;
+}
+
+.each-day {
+    padding: 5px;
+    color: black;
+    border: black;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+.day-name {
+    background: #eee;
+    color: black;
+    font-size: 15px;
+  }
+.year-heading-name {
+    color: black;
+    text-align: center;
+    font-size: 13px;
+    padding-bottom: 12px;
+    cursor: pointer;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
