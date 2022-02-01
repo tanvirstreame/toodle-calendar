@@ -1,5 +1,11 @@
 "use strict";
 
+require("core-js/modules/es.regexp.exec.js");
+
+require("core-js/modules/es.string.replace.js");
+
+require("core-js/modules/web.url.to-json.js");
+
 exports.getDaysInMonth = (month, year) => {
   // Here January is 1 based
   //Day 0 is the last day in the previous month
@@ -17,4 +23,8 @@ exports.getCurrentMonthName = value => {
 exports.getYearList = () => {
   const now = new Date().getUTCFullYear();
   return Array(now - (now - 30)).fill('').map((value, index) => now - index);
+};
+
+exports.getDateFormString = dateString => {
+  return dateString.toJSON().slice(0, 10).replace(/-/g, '-');
 };

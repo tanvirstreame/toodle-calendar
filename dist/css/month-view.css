@@ -41,3 +41,11 @@ ol {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
 }
+
+.today-date {
+    text-decoration: underline;
+}
+.selected-date {
+    background-color: blue;
+    color: white;
+}

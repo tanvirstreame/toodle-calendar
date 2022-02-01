@@ -1,38 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./css/calender-view.css"
 import Month from "./Month";
-import { getDaysInMonth } from "./utils"
+import { getDaysInMonth } from "./utils";
 import MonthList from "./MonthList";
 import YearList from "./YearList";
 
 const Calendar = (props) => {
 	const [numberOfMonth, setNumberOfMonth] = useState(0);
 	const [calenderValue, setCalenderValue] = useState("");
-	const [calenderObject, setCalenderObject] = useState({});
+	const [calenderObject, setCalenderObject] = useState({
+		day: 0,
+		month: 0,
+		year: 0
+	});
 	const [weekDayStart, setWeekDayStart] = useState(0);
 	const [visibleMonthList, setVisibleMonthList] = useState(false);
 	const [visibleYearList, setVisibleYearList] = useState(false);
 	const [visibleCalendarList, setVisibleCalendarList] = useState(false);
+	const [todayDateObj, setTodayDateObj] = useState({});
+	const [selectedDateObj, setSelectedDateObj] = useState({});
 
 
 	const handleOnYearChange = (yearNumber) => {
-		setCalenderObject({
+		const tempCalenderObject = {
 			...calenderObject,
 			year: yearNumber
-		})
-		setNumberOfMonth(getDaysInMonth(calenderObject.month, yearNumber))
-		setCalenderValue(new Date(`${yearNumber}/${calenderObject.month}/${calenderObject.day}`).toJSON().slice(0, 10))
+		};
+
+		setCalenderObject(tempCalenderObject);
+		setNumberOfMonth(getDaysInMonth(tempCalenderObject.month, yearNumber))
+		setCalenderValue(new Date(`${yearNumber}/${tempCalenderObject.month}/${tempCalenderObject.day}`).toJSON().slice(0, 10))
+		setFirstDayWeekName(tempCalenderObject);
 		handleOpenYearList();
 	}
 
 	const handleOnMonthChange = (monthNumber) => {
-		setCalenderObject({
+		const tempCalenderObject = {
 			...calenderObject,
-			month: monthNumber + 1
-		})
-		setNumberOfMonth(getDaysInMonth(monthNumber, calenderObject.year))
-		setCalenderValue(new Date(`${calenderObject.year}/${monthNumber + 1}/${calenderObject.day}`).toJSON().slice(0, 10))
+			month: monthNumber
+		}
+		setCalenderObject(tempCalenderObject)
+		setNumberOfMonth(getDaysInMonth(monthNumber, tempCalenderObject.year))
+		setCalenderValue(new Date(`${tempCalenderObject.year}/${tempCalenderObject?.month}/${tempCalenderObject.day}`)?.toJSON()?.slice(0, 10))
 		handleOpenMonthList();
+		setFirstDayWeekName(tempCalenderObject);
 	}
 
 	const handleOpenYearList = () => {
@@ -45,11 +56,28 @@ const Calendar = (props) => {
 
 	const handleOpenCalendarList = () => {
 		setVisibleCalendarList(!visibleCalendarList);
+		if (visibleYearList) {
+			setVisibleYearList(!visibleYearList);
+		}
+		if (visibleMonthList) {
+			setVisibleMonthList(!visibleMonthList);
+		}
+
 	}
 
+	const escFunction = useCallback((event) => {
+		if (event.keyCode === 27) {
+			setVisibleYearList(false);
+			setVisibleMonthList(false);
+		}
+	}, []);
 
 	const handleClickDateChange = (value) => {
 		setCalenderObject({
+			...calenderObject,
+			day: value
+		})
+		setSelectedDateObj({
 			...calenderObject,
 			day: value
 		})
@@ -58,31 +86,47 @@ const Calendar = (props) => {
 	}
 
 	useEffect(() => {
+		document.addEventListener("keydown", escFunction, false);
 		const dateObject = calenderValue ? new Date(calenderValue) : new Date();
 
 		const calenderInfo = {
-			day: 1,
+			day: dateObject.getDate(),
 			year: dateObject.getFullYear(),
 			month: dateObject.getMonth() + 1
 		}
 
+		const currentDate = new Date();
+		setTodayDateObj({
+			day: currentDate.getDate(),
+			year: currentDate.getFullYear(),
+			month: currentDate.getMonth() + 1
+		})
+
 		setNumberOfMonth(getDaysInMonth(calenderInfo.month, calenderInfo.year))
-		setCalenderValue(dateObject.toJSON().slice(0, 10))
-
-
-
+		setCalenderValue(dateObject?.toJSON()?.slice(0, 10))
+		setFirstDayWeekName({
+			...calenderInfo,
+			month: calenderInfo?.month + 1
+		});
 		setCalenderObject(calenderInfo);
-		setWeekDayStart(new Date(`${calenderInfo.year}/${calenderInfo.month}/01`).getDay() + 1);
+
+		return () => {
+			document.removeEventListener("keydown", escFunction, false);
+		};
+
 	}, [])
 
 	useEffect(() => {
 		if (calenderValue) {
-			if(props.handleOnChange) {
+			if (props.handleOnChange) {
 				props.handleOnChange(calenderValue);
 			}
-			
 		}
-	}, [calenderValue])
+	}, [calenderValue]);
+
+	const setFirstDayWeekName = (data) => {
+		setWeekDayStart(new Date(`${data.year}/${String(data.month).padStart(2, '0')}/01`).getDay() + 1);
+	}
 
 	return (
 		<>
@@ -103,6 +147,8 @@ const Calendar = (props) => {
 						}
 						<Month
 							calenderValue={calenderValue}
+							selectedDateObj={selectedDateObj}
+							todayDateObj={todayDateObj}
 							weekDayStart={weekDayStart}
 							numberOfMonth={numberOfMonth}
 							calenderObject={calenderObject}
@@ -117,7 +163,7 @@ const Calendar = (props) => {
 			</div>
 			<input
 				name="calender"
-				className={props.className}
+				className={props?.inputBoxClassName}
 				onClick={() => handleOpenCalendarList()}
 				type="text"
 				value={calenderValue}

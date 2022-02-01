@@ -26,9 +26,10 @@ const App = () => {
     console.log(value);
   }
   return (
-    <div className="App">
-      <Calendar handleOnChange={handleOnChange} />
-    </div>
+    <Calendar 
+      handleOnChange={handleOnChange} 
+      inputBoxClassName="add-your-custom-css"
+    />
   );
 }
 
